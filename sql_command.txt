@@ -1,0 +1,7 @@
+BIGSERIAL - IT GIVE UNIQUE AND INCREMENTAL ID OR NUMBER 
+
+CONSTRAINST ->
+    1.NOT NULL - THE ITEM MUST HAVE TO BE SET NO MATTER WHAT! - THIS FIELD NEVER FILLED NULL   
+    2.CHECK ("AGE" >= x and "AGE" <= y) - check it btw x and y
+    3.where x = y - find single data by searching x to find y
+    4.RETURNING * - return recent insert data in the table 

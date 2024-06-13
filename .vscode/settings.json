@@ -1,0 +1,15 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Medical Sotre",
+            "password": "akram2002",
+            "database": "mdstore",
+            "username": "postgres",
+            "connectionTimeout": 30
+        }
+    ]
+}
