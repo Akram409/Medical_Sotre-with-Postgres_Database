@@ -405,4 +405,284 @@ SELECT 'Supply' AS "Type";
 -- Detail table list
 \l
 -- help 
-\?
+\?;
+
+
+-- Searching data in possible ways(at least ten ways)from single table
+-- 1) USING = OPERATOR
+SELECT *
+FROM "DOCTOR"
+WHERE "D_SPECIALIST" = 'Gastroenterology';
+
+-- 2) USING > OPERATOR 
+SELECT *
+FROM "INVENTORY"
+WHERE "M_TYPE" = 'Tablet' AND "M_REMAIN" > 0;
+
+-- 3) USING ORDER BY
+SELECT *
+FROM "EMPLOYEES"
+ORDER BY "E_AGE" ASC;
+
+-- 4) USING BETWEEN
+SELECT *
+FROM "PAYMENT_HISTORY"
+WHERE "TAKEN_DATE" BETWEEN '2023-01-01' AND '2023-10-19';
+
+-- 5) USING LIKE
+SELECT *
+FROM "CUSTOMER"
+WHERE "C_ADDRESS" LIKE '%chattogram%';
+
+-- 6) USING AND OPERATOR
+SELECT *
+FROM "INVENTORY"
+WHERE "M_TYPE" = 'tablet' AND "M_PRICE" < 50;
+
+-- 7) USING IN
+SELECT *
+FROM "CUSTOMER"
+WHERE "D_ID" IN (6, 2, 8);
+
+-- 8) RENAME COLUMN NAME USING AS
+SELECT "C_NAME" AS "CUSTOMER NAME"
+FROM "CUSTOMER";
+
+-- 9) USING BETWEEN AND
+SELECT *
+FROM "CUSTOMER"
+WHERE "C_AGE" BETWEEN 25 AND 30;
+
+-- 10) USING CONCATENATION OPERATOR
+SELECT "M_NAME" || ' ' || INITCAP("M_TYPE") AS "Medicine Name and Details"
+FROM "INVENTORY";
+
+-- 11) USING INITCAP() FUNCTION
+SELECT INITCAP("S_NAME") AS "S_NAME"
+FROM "SUPPLIER";
+
+-- 12) USING MAX() FUNCTION
+SELECT MAX("M_PRICE") AS "MAX PRICE"
+FROM "INVENTORY";
+
+-- 13) USING SUM() FUNCTION
+SELECT SUM("M_PRICE") AS "Total"
+FROM "INVENTORY";
+
+
+--  Searching data in possible ways(at least five ways)from multiple tables
+-- 1) USING FULL OUTER JOIN TO DISPLAY TWO TABLES
+SELECT *
+FROM "SUPPLIER" s
+FULL OUTER JOIN "SUPPLY_HISTORY" h
+ON s."S_ID" = h."SUPPLIED_BY";
+
+-- 2) USING JOIN TO DISPLAY TWO TABLES
+SELECT c."C_NAME", c."C_AGE", d."D_NAME" AS "Prescribed By", d."D_EMAIL", d."D_SPECIALIST"
+FROM "CUSTOMER" c
+JOIN "DOCTOR" d ON c."D_ID" = d."D_ID";
+
+-- 3) SHOW CUSTOMER AND PRESCRIPTION TABLES DETAILS
+SELECT c."C_NAME", p."M_NAME", p."M_QUANTITY", p."TAKEN_DATE"
+FROM "CUSTOMER" c
+JOIN "PAYMENT_HISTORY" p ON c."C_ID" = p."C_ID";
+
+-- 4) SHOW CUSTOMER AND EMPLOYEES TABLES DETAILS
+SELECT c."C_NAME", e."E_NAME", p."TAKEN_DATE"
+FROM "CUSTOMER" c
+JOIN "PAYMENT_HISTORY" p ON c."C_ID" = p."C_ID"
+JOIN "EMPLOYEES" e ON e."E_ID" = p."SERVED_BY";
+
+-- 5) SHOW CUSTOMERS WHO PURCHASED MORE THAN 3 MEDICINES
+SELECT c."C_NAME", p."M_NAME", p."M_QUANTITY"
+FROM "CUSTOMER" c
+JOIN "PAYMENT_HISTORY" p ON c."C_ID" = p."C_ID"
+WHERE p."M_QUANTITY" > 3;
+
+-- 6) MEDICINE ID AND TOTAL PRICE BROUGHT BY CUSTOMER “NAIM”
+SELECT p."M_ID", SUM(p."M_QUANTITY" * i."M_PRICE") AS "TOTAL_PRICE"
+FROM "PAYMENT_HISTORY" p
+JOIN "INVENTORY" i ON p."M_NAME" = i."M_NAME"
+WHERE p."C_ID" = (SELECT "C_ID" FROM "CUSTOMER" WHERE "C_NAME" = 'naim')
+GROUP BY p."M_ID";
+
+--  Searching data in possible ways(at least ten ways)from single table
+-- ❖1) SUBQUERY IN SELECT: NAME OF MEDICINE, DOCTOR, AND TAKEN DATE BY CUSTOMER NAME “MUSTAFIZ”
+SELECT "M_NAME",
+    (SELECT "D_NAME" FROM "DOCTOR" WHERE "D_ID" = p."D_ID") AS "D_NAME",
+    (SELECT "C_NAME" FROM "CUSTOMER" WHERE "C_ID" = p."C_ID") AS "C_NAME",
+    "TAKEN_DATE"
+FROM "PAYMENT_HISTORY" p
+WHERE p."C_ID" = (SELECT "C_ID" FROM "CUSTOMER" WHERE "C_NAME" = 'mustafiz');
+
+-- ❖2) NESTED SUBQUERY: DISPLAYING CUSTOMER NAMES WHO PURCHASE THE MAXIMUM COST MEDICINE
+SELECT *
+FROM "CUSTOMER" c
+WHERE c."C_ID" IN (
+    SELECT p."C_ID"
+    FROM "PAYMENT_HISTORY" p
+    WHERE c."C_ID" = p."C_ID"
+    AND p."M_ID" = (
+        SELECT "M_ID"
+        FROM "INVENTORY"
+        WHERE "M_PRICE" = (SELECT MAX("M_PRICE") FROM "INVENTORY")
+    )
+);
+
+-- ❖3) SUBQUERY WITH GROUP BY: RETRIEVE DOCTORS WITH THE HIGHEST AVERAGE MEDICINE QUANTITY SERVED
+SELECT "D_NAME", "D_SPECIALIST"
+FROM "DOCTOR"
+WHERE (SELECT AVG("M_QUANTITY") FROM "PAYMENT_HISTORY" WHERE "D_ID" = "DOCTOR"."D_ID") = (
+    SELECT MAX(avg_quantity) 
+    FROM (
+        SELECT "D_ID", AVG("M_QUANTITY") AS avg_quantity 
+        FROM "PAYMENT_HISTORY" 
+        GROUP BY "D_ID"
+    ) subquery
+);
+
+-- ❖4) SUBQUERY WITH ORDER BY AND LIMIT: RETRIEVE THE TOP CUSTOMERS WHO BUY THE MOST EXPENSIVE MEDICINE
+SELECT *
+FROM "CUSTOMER" c
+WHERE c."C_ID" IN (
+    SELECT m."C_ID"
+    FROM "PAYMENT_HISTORY" m
+    WHERE c."C_ID" = m."C_ID"
+    AND m."M_ID" = (
+        SELECT "M_ID"
+        FROM "INVENTORY"
+        WHERE "M_PRICE" = (SELECT MAX("M_PRICE") FROM "INVENTORY")
+    )
+);
+
+-- ❖5) SUBQUERY WITH AGGREGATE FUNCTION: RETRIEVE CUSTOMERS WITH AGES GREATER THAN THE AVERAGE AGE OF DOCTORS.
+SELECT "C_NAME"
+FROM "CUSTOMER"
+WHERE "C_AGE" > (SELECT AVG("D_AGE") FROM "DOCTOR");
+
+-- ❖6) SUBQUERY WITH EXISTS: RETRIEVE DOCTORS WHO SERVED AT LEAST ONE CUSTOMER.
+SELECT "D_NAME"
+FROM "DOCTOR"
+WHERE EXISTS (SELECT 1 FROM "PAYMENT_HISTORY" WHERE "D_ID" = "DOCTOR"."D_ID");
+
+-- ❖7) SUBQUERY WITH MULTIPLE CONDITIONS: RETRIEVE CUSTOMERS WHO PURCHASED A MEDICINE SERVED BY A SPECIFIC DOCTOR.
+SELECT "C_NAME"
+FROM "CUSTOMER"
+WHERE "C_ID" IN (
+    SELECT "C_ID"
+    FROM "PAYMENT_HISTORY"
+    WHERE "M_ID" = 4 AND "D_ID" = 9
+);
+
+-- ❖8) SUBQUERY WITH MATHEMATICAL OPERATION: RETRIEVE MEDICINES WITH QUANTITIES GREATER THAN THE AVERAGE QUANTITY MULTIPLIED BY 2.
+SELECT "M_NAME"
+FROM "PAYMENT_HISTORY"
+WHERE "M_QUANTITY" > (SELECT AVG("M_QUANTITY") * 2 FROM "PAYMENT_HISTORY");
+
+-- ❖9) SUBQUERY IN UPDATE STATEMENT: UPDATE THE AGE OF A CUSTOMER BASED ON THE MAXIMUM AGE IN THE CUSTOMER TABLE.
+UPDATE "CUSTOMER"
+SET "C_AGE" = (SELECT MAX("C_AGE") FROM "CUSTOMER")
+WHERE "C_NAME" = 'bijoy';
+
+-- ❖10) SUBQUERY IN DELETE STATEMENT: DELETE A SUPPLIER BASED ON A CONDITION IN ANOTHER TABLE.
+DELETE FROM "SUPPLIER"
+WHERE "S_ID" IN (
+    SELECT "S_ID"
+    FROM "SUPPLY_HISTORY"
+    WHERE "SUPPLY_CONDITION" = 'specific_condition'
+);
+
+--  Searching data in possible ways(at least ten ways)from single table
+-- ❖1) SIMPLE SELECT STATEMENT
+DO $$
+DECLARE
+    v_customer_name TEXT;
+BEGIN
+    SELECT c_name INTO v_customer_name FROM customer WHERE c_id = 1;
+    RAISE NOTICE 'Customer Name: %', v_customer_name;
+END $$;
+
+-- ❖2) CURSOR LOOPS
+DO $$
+DECLARE
+    customer_cursor CURSOR FOR SELECT c_name FROM customer;
+    v_customer_name TEXT;
+BEGIN
+    FOR rec IN customer_cursor LOOP
+        RAISE NOTICE 'Customer Name: %', rec.c_name;
+    END LOOP;
+END $$;
+
+-- ❖3) SIMPLE SELECT STATEMENT WITH CONDITIONAL LOGIC
+DO $$
+DECLARE
+    v_customer_age INT;
+    v_message TEXT;
+BEGIN
+    -- Assuming you want to check the age of a customer with c_id = 1
+    SELECT c_age INTO v_customer_age FROM customer WHERE c_id = 1;
+    IF v_customer_age < 18 THEN
+        v_message := 'Customer is a minor.';
+    ELSIF v_customer_age >= 18 AND v_customer_age < 65 THEN
+        v_message := 'Customer is an adult.';
+    ELSE
+        v_message := 'Customer is a senior citizen.';
+    END IF;
+    RAISE NOTICE '%', v_message;
+END $$;
+
+-- ❖4) CURSOR LOOPS WITH A SELECT STATEMENT
+DO $$
+DECLARE
+    customer_cursor CURSOR FOR SELECT c_name FROM customer;
+    v_customer_name TEXT;
+BEGIN
+    FOR rec IN customer_cursor LOOP
+        RAISE NOTICE 'Customer Name: %', rec.c_name;
+    END LOOP;
+    -- Separate select statement for a specific customer
+    SELECT c_name INTO v_customer_name FROM customer WHERE c_id = 1;
+    RAISE NOTICE 'Customer Name: %', v_customer_name;
+END $$;
+
+-- ❖5) PRINT SUPPLIER INFORMATION PROCEDURE
+CREATE OR REPLACE PROCEDURE print_supplier_info(p_supplier_id INT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_supplier_name TEXT;
+    v_supplier_address TEXT;
+BEGIN
+    SELECT s_name, s_address INTO v_supplier_name, v_supplier_address
+    FROM supplier
+    WHERE s_id = p_supplier_id;
+    RAISE NOTICE 'Supplier: %, Address: %', v_supplier_name, v_supplier_address;
+END $$;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

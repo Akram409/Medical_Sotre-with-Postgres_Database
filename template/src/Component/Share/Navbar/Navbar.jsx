@@ -1,9 +1,9 @@
 import React from 'react';
-import { AuthContext } from '../../../Provider/AuthProvider';
+// import { AuthContext } from '../../../Provider/AuthProvider';
 
 const Navbar = () => {
-    const { auths, logOut } = useContext(AuthContext);
-    const user = auths?.user;
+    // const { auths, logOut } = useContext(AuthContext);
+    // const user = auths?.user;
     return (
         <div>
             
