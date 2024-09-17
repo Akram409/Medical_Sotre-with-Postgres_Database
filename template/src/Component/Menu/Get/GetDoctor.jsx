@@ -1,27 +1,36 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { message } from "antd";
+import { Select, Upload, message } from "antd";
 import {
+  addData,
   createDoctor,
-  deleteDoctor,
-  getDoctor,
-  updateDoctor,
+  deleteData,
+  getTableData,
+  updateData,
 } from "../apiService";
 import { GrEdit } from "react-icons/gr";
-import { MdOutlineDeleteForever } from "react-icons/md";
+import { PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 
 const GetDoctor = () => {
   const [doctors, setDoctors] = useState([]);
   const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [newDoctor, setNewDoctor] = useState(null);
   console.log("🚀 ~ GetDoctor ~ selectedDoctor:", selectedDoctor);
   const [currentPage, setCurrentPage] = useState(1);
   const DoctorsPerPage = 10;
+  const [fileList, setFileList] = useState([]);
 
   const showDrawer = (doctor) => {
     setSelectedDoctor(doctor);
     setOpen(true);
+  };
+
+  const showDrawer2 = (doctor) => {
+    setNewDoctor(doctor);
+    setOpen2(true);
   };
 
   const showDetail = (doctor) => {
@@ -35,9 +44,15 @@ const GetDoctor = () => {
     setSelectedDoctor(null);
   };
 
+  const onClose2 = () => {
+    setNewDoctor(null);
+    setOpen2(false);
+    setNewDoctor(null);
+  };
+
   const fetchDoctors = async () => {
     try {
-      const response = await getDoctor();
+      const response = await getTableData("DOCTOR");
       const data = response.data.data;
       setDoctors(data);
     } catch (error) {
@@ -59,8 +74,13 @@ const GetDoctor = () => {
     };
 
     try {
-      await updateDoctor(selectedDoctor.D_ID, doctorData);
-      message.success("Doctor updated successfully");
+      if (selectedDoctor) {
+        await updateData("DOCTOR", selectedDoctor.D_ID, doctorData);
+        message.success("Doctor updated successfully");
+      } else {
+        await createDoctor(doctorData);
+        message.success("Doctor created successfully");
+      }
       fetchDoctors();
       onClose();
     } catch (error) {
@@ -69,13 +89,44 @@ const GetDoctor = () => {
     }
   };
 
+  const onFinish2 = async (values) => {
+    try {
+      const { name, email, speciality, contact } = values;
+
+      const data = new FormData();
+      data.append("D_NAME", name);
+      data.append("D_EMAIL", email);
+      data.append("D_SPECIALIST", speciality);
+      data.append("D_PHONE", parseInt(contact));
+      if (fileList[0]) {
+        data.append("images", fileList[0].originFileObj);
+      }
+
+      try {
+        await addData("DOCTOR", data);
+        message.success("Doctor created successfully");
+        fetchDoctors();
+        onClose2();
+      } catch (error) {
+        console.error("Error creating doctor:", error);
+        message.error("Failed to create doctor. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error creating doctor:", error);
+      message.error("Failed to create doctor. Please try again later.");
+    }
+  };
+
   const onFinishFailed = (errorInfo) => {
+    console.log("Failed:", errorInfo);
+  };
+  const onFinishFailed2 = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
 
   const handleDeleteDoctor = async (id) => {
     try {
-      await deleteDoctor(id);
+      await deleteData("DOCTOR", id);
       fetchDoctors();
       message.success("Doctor deleted successfully");
     } catch (error) {
@@ -91,6 +142,29 @@ const GetDoctor = () => {
     : [];
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const normFile = (e) => {
+    setFileList(e.fileList);
+    // console.log(e.fileList);
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
+  };
+
+  const props = {
+    multiple: false,
+    onRemove: (file) => {
+      const index = fileList.indexOf(file);
+      const newFileList = fileList.slice();
+      newFileList.splice(index, 1);
+      setFileList(newFileList);
+    },
+    beforeUpload: () => {
+      return false;
+    },
+    fileList,
+  };
 
   return (
     <div className="p-6">
@@ -110,12 +184,139 @@ const GetDoctor = () => {
       <div className=" hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
         <div className="flex justify-between">
           <h4 className="text-2xl font-semibold">Doctors Panel</h4>
+          <>
+            <Button
+              type="primary"
+              onClick={showDrawer2}
+              icon={<PlusOutlined />}
+            >
+              New Doctor
+            </Button>
+            <Drawer
+              title="Add new Doctor"
+              width={720}
+              onClose={onClose2}
+              open={open2}
+              extra={
+                <Space>
+                  <Button onClick={onClose2}>Cancel</Button>
+                  <Button onClick={onClose2} type="primary">
+                    Submit
+                  </Button>
+                </Space>
+              }
+            >
+              <Form
+                layout="vertical"
+                onFinish={onFinish2}
+                onFinishFailed={onFinishFailed2}
+              >
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      name="name"
+                      label="Name"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter user name",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Please enter user name" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="speciality"
+                      label="Speciality"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter user speciality",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Please enter user name" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Form.Item
+                      name="email"
+                      label="Email"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter user Email",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Please enter user Email" />
+                    </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item
+                      name="contact"
+                      label="Contact"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter user Contact",
+                        },
+                      ]}
+                    >
+                      <Input placeholder="Please enter user Contact" />
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <label htmlFor="">Image</label>
+                    <Form.Item
+                      name="user_image"
+                      valuePropName="fileList"
+                      getValueFromEvent={normFile}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please upload a Image!",
+                        },
+                      ]}
+                    >
+                      <Upload
+                        name="logo"
+                        action="/upload.do"
+                        listType="picture"
+                        {...props}
+                      >
+                        <Button className="p-2 h-10" icon={<UploadOutlined />}>
+                          Click to upload Image
+                        </Button>
+                      </Upload>
+                    </Form.Item>
+                  </Col>
+                </Row>
+                <Form.Item>
+                  <Space>
+                    <Button onClick={onClose2}>Cancel</Button>
+                    <Button type="primary" htmlType="submit">
+                      Submit
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </Form>
+            </Drawer>
+          </>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
               <tr className="font-semibold text-base text-center">
-                <th>No.</th>
+                <th>SL</th>
+                <th>ID</th>
+                <th>Photo</th>
                 <th>Name</th>
                 <th>Specialty</th>
                 <th>Email</th>
@@ -128,6 +329,21 @@ const GetDoctor = () => {
               {currentDoctors.map((doctor, index) => (
                 <tr key={doctor.D_ID}>
                   <td>{index + 1}</td>
+                  <td>
+                    <div className="avatar">
+                      <div className="mask mask-squircle h-12 w-12">
+                        <img
+                          src={
+                            doctor.D_PHOTO
+                              ? doctor.D_PHOTO
+                              : "https://i.ibb.co/yPXmTg3/images.jpg"
+                          }
+                          alt="Doctor Avatar"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td>{doctor.D_ID}</td>
                   <td>{doctor.D_NAME}</td>
                   <td>{doctor.D_SPECIALIST}</td>
                   <td>{doctor.D_EMAIL}</td>
@@ -184,7 +400,7 @@ const GetDoctor = () => {
                     </dialog>
                   </td>
                   <td>
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="flex items-center justify-center">
                       <Link
                         to="/"
                         className="text-[#1d9cb5] font-semibold"
@@ -249,13 +465,6 @@ const GetDoctor = () => {
                           </Form>
                         </Drawer>
                       </>
-                      <button
-                        className="btn btn-error text-white"
-                        onClick={() => handleDeleteDoctor(doctor?.D_ID)}
-                      >
-                        <MdOutlineDeleteForever size="1.4em" />
-                        Delete
-                      </button>
                     </div>
                   </td>
                 </tr>

@@ -1,84 +1,81 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
-import {
-  createCustomer,
-  getTableData,
-  updateData,
-} from "../apiService";
+import { createCustomer, getTableData, updateData } from "../apiService";
 import { GrEdit } from "react-icons/gr";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import { Link } from "react-router-dom";
 
-const GetCustomer = () => {
-  const [customers, setCustomers] = useState([]);
+const GetSupplier = () => {
+  const [suppliers, setSuppliers] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const CustomersPerPage = 10;
+  const suppliersPerPage = 10;
 
-  const showDrawer = (customer) => {
-    setSelectedCustomer(customer);
+  const showDrawer = (supplier) => {
+    setSelectedSupplier(supplier);
     setOpen(true);
   };
 
-  const showDetail = (customer) => {
+  const showDetail = (supplier) => {
     document.getElementById("my_modal_5").showModal();
-    setSelectedCustomer(customer);
+    setSelectedSupplier(supplier);
   };
 
   const onClose = () => {
-    setSelectedCustomer(null);
+    setSelectedSupplier(null);
     setOpen(false);
   };
 
-  const fetchCustomers = async () => {
+  const fetchSuppliers = async () => {
     try {
-      const response = await getTableData("CUSTOMER"); 
+      const response = await getTableData("SUPPLIER");
       const data = response.data.data;
-      setCustomers(data);
+      setSuppliers(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
-      message.error("Failed to fetch customers");
+      console.error("Error fetching suppliers:", error);
+      message.error("Failed to fetch suppliers");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchSuppliers();
   }, []);
 
-
   const onFinish = async (values) => {
-    const customerData = {
-      C_NAME: values.name,
-      C_AGE: values.age,
-      C_ADDRESS: values.address,
-      C_CONTACT: values.contact,
+    const supplierData = {
+      S_NAME: values.name,
+      S_AGE: values.age,
+      S_ADDRESS: values.address,
+      S_PHONE: values.phone,
     };
 
     try {
-      if (selectedCustomer) {
-        await updateData("CUSTOMER", selectedCustomer.C_ID, customerData);  
-        message.success("Customer updated successfully");
+      if (selectedSupplier) {
+        await updateData("SUPPLIER", selectedSupplier.S_ID, supplierData);
+        message.success("Supplier updated successfully");
       } else {
-        await createCustomer(customerData); 
-        message.success("Customer created successfully");
+        await createCustomer(supplierData); // Adjust this to the correct API call for creating supplier if needed
+        message.success("Supplier created successfully");
       }
-      fetchCustomers();
+      fetchSuppliers();
       onClose();
     } catch (error) {
-      console.error("Error updating customer:", error);
-      message.error("Failed to update customer");
+      console.error("Error updating supplier:", error);
+      message.error("Failed to update supplier");
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+
   // Logic for pagination
-  const indexOfLastCustomer = currentPage * CustomersPerPage;
-  const indexOfFirstCustomer = indexOfLastCustomer - CustomersPerPage;
-  const currentCustomers = Array.isArray(customers)
-    ? customers.slice(indexOfFirstCustomer, indexOfLastCustomer)
+  const indexOfLastSupplier = currentPage * suppliersPerPage;
+  const indexOfFirstSupplier = indexOfLastSupplier - suppliersPerPage;
+  const currentSuppliers = Array.isArray(suppliers)
+    ? suppliers.slice(indexOfFirstSupplier, indexOfLastSupplier)
     : [];
 
   // Change page
@@ -87,21 +84,21 @@ const GetCustomer = () => {
   return (
     <div className="p-6">
       <div className="grid lg:grid-cols-2 grid-cols-1 gap-5">
-        <div className="flex justify-center text-center  p-4 rounded-md mb-7 border-2 border-black shadow-xl">
-          <div className="">
+        <div className="flex justify-center text-center p-4 rounded-md mb-7 border-2 border-black shadow-xl">
+          <div>
             <h4 className="text-2xl font-semibold">Hello Sir,</h4>
             <p>{"Here's what's going on"}</p>
           </div>
         </div>
         <div className="flex justify-center items-center p-4 rounded-md mb-7 border-2 border-black shadow-xl">
           <h4 className="text-2xl font-semibold">
-          Total Customers: {customers?.length}
+            Total Suppliers: {suppliers?.length}
           </h4>
         </div>
       </div>
-      <div className=" hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
+      <div className="hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
         <div className="flex justify-between">
-          <h4 className="text-2xl font-semibold">Customers Panel</h4>
+          <h4 className="text-2xl font-semibold">Suppliers Panel</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
@@ -112,26 +109,24 @@ const GetCustomer = () => {
                 <th>Name</th>
                 <th>Age</th>
                 <th>Address</th>
-                <th>Contact</th>
-                <th>Total Serve</th>
+                <th>Phone</th>
                 <th>Details</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody className="text-center">
-              {currentCustomers.map((customer, index) => (
-                <tr key={customer.C_ID}>
+              {currentSuppliers.map((supplier, index) => (
+                <tr key={supplier.S_ID}>
                   <td>{index + 1}</td>
-                  <td>{customer.C_ID}</td>
-                  <td>{customer.C_NAME}</td>
-                  <td>{customer.C_AGE}</td>
-                  <td>{customer.C_ADDRESS}</td>
-                  <td>{customer.C_CONTACT}</td>
-                  <td>{customer.C_SERVE}</td>
+                  <td>{supplier.S_ID}</td>
+                  <td>{supplier.S_NAME}</td>
+                  <td>{supplier.S_AGE}</td>
+                  <td>{supplier.S_ADDRESS}</td>
+                  <td>{supplier.S_PHONE}</td>
                   <td>
                     <button
                       className="btn btn-info text-white"
-                      onClick={() => showDetail(customer)}
+                      onClick={() => showDetail(supplier)}
                     >
                       Details
                     </button>
@@ -147,42 +142,26 @@ const GetCustomer = () => {
                         </div>
                         <div className="mt-3">
                           <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              ID:
-                            </span>{" "}
-                            {selectedCustomer?.C_ID}
+                            <span className="font-semibold text-xl">ID:</span>{" "}
+                            {selectedSupplier?.S_ID}
                           </h1>
                           <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              Name:
-                            </span>{" "}
-                            {selectedCustomer?.C_NAME}
+                            <span className="font-semibold text-xl">Name:</span>{" "}
+                            {selectedSupplier?.S_NAME}
                           </h1>
                           <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              Age:
-                            </span>{" "}
-                            {selectedCustomer?.C_AGE}
+                            <span className="font-semibold text-xl">Age:</span>{" "}
+                            {selectedSupplier?.S_AGE}
                           </h1>
                           <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              Contact:
-                            </span>{" "}
-                            {selectedCustomer?.C_CONTACT}
+                            <span className="font-semibold text-xl">Phone:</span>{" "}
+                            {selectedSupplier?.S_PHONE}
                           </h1>
                         </div>
                         <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                            Total Serve:
-                            </span>{" "}
-                            {selectedCustomer?.C_SERVE}
-                          </h1>
-                          <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              Address:
-                            </span>{" "}
-                            {selectedCustomer?.C_ADDRESS}
-                          </h1>
+                          <span className="font-semibold text-xl">Address:</span>{" "}
+                          {selectedSupplier?.S_ADDRESS}
+                        </h1>
                         <div className="modal-action">
                           <form method="dialog">
                             <button className="btn btn-error text-white">
@@ -195,14 +174,11 @@ const GetCustomer = () => {
                   </td>
                   <td>
                     <div className="flex items-center justify-center">
-                      <Link
-                        to="/"
-                        className="text-[#1d9cb5] font-semibold"
-                      ></Link>
+                      <Link to="/" className="text-[#1d9cb5] font-semibold"></Link>
                       <>
                         <button
                           className="btn btn-warning text-white"
-                          onClick={() => showDrawer(customer)}
+                          onClick={() => showDrawer(supplier)}
                         >
                           <GrEdit />
                           Edit
@@ -216,11 +192,10 @@ const GetCustomer = () => {
                           <Form
                             layout="vertical"
                             initialValues={{
-                              name: selectedCustomer?.C_NAME,
-                              age: selectedCustomer?.C_AGE,
-                              address: selectedCustomer?.C_ADDRESS,
-                              contact: selectedCustomer?.C_CONTACT,
-                              serve: selectedCustomer?.C_SERVE,
+                              name: selectedSupplier?.S_NAME,
+                              age: selectedSupplier?.S_AGE,
+                              address: selectedSupplier?.S_ADDRESS,
+                              phone: selectedSupplier?.S_PHONE,
                             }}
                             onFinish={onFinish}
                             onFinishFailed={onFinishFailed}
@@ -228,31 +203,24 @@ const GetCustomer = () => {
                             <Row gutter={16}>
                               <Col span={12}>
                                 <Form.Item name="name" label="Name">
-                                  <Input placeholder="Please enter user name" />
+                                  <Input placeholder="Please enter supplier name" />
                                 </Form.Item>
                               </Col>
                               <Col span={12}>
                                 <Form.Item name="age" label="Age">
-                                  <Input placeholder="Please enter user age" />
+                                  <Input placeholder="Please enter supplier age" />
                                 </Form.Item>
                               </Col>
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
                                 <Form.Item name="address" label="Address">
-                                  <Input placeholder="Please enter Email" />
+                                  <Input placeholder="Please enter supplier address" />
                                 </Form.Item>
                               </Col>
                               <Col span={12}>
-                                <Form.Item name="contact" label="Contact">
-                                  <Input placeholder="Please enter user contact" />
-                                </Form.Item>
-                              </Col>
-                            </Row>
-                            <Row gutter={16}>
-                              <Col span={12}>
-                                <Form.Item name="serve" label="serve">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="phone" label="Phone">
+                                  <Input placeholder="Please enter supplier phone" />
                                 </Form.Item>
                               </Col>
                             </Row>
@@ -283,7 +251,7 @@ const GetCustomer = () => {
             &larr; Previous page
           </button>
           {Array.from(
-            { length: Math.ceil(customers.length / CustomersPerPage) },
+            { length: Math.ceil(suppliers.length / suppliersPerPage) },
             (_, i) => (
               <button
                 key={i}
@@ -300,7 +268,7 @@ const GetCustomer = () => {
             className="join-item btn btn-outline mr-2"
             onClick={() => paginate(currentPage + 1)}
             disabled={
-              currentPage === Math.ceil(customers.length / CustomersPerPage)
+              currentPage === Math.ceil(suppliers.length / suppliersPerPage)
             }
           >
             Next &rarr;
@@ -311,4 +279,4 @@ const GetCustomer = () => {
   );
 };
 
-export default GetCustomer;
+export default GetSupplier;

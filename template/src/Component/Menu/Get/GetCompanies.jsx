@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
 import {
-  createCustomer,
+    createCompanies,
   getTableData,
   updateData,
 } from "../apiService";
@@ -10,75 +10,79 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import { Link } from "react-router-dom";
 
-const GetCustomer = () => {
-  const [customers, setCustomers] = useState([]);
+const GetCompanies = () => {
+  const [companies, setCompanies] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCompany, setSelectedCompany] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const CustomersPerPage = 10;
+  const CompaniesPerPage = 10;
 
-  const showDrawer = (customer) => {
-    setSelectedCustomer(customer);
+  const showDrawer = (company) => {
+    setSelectedCompany(company);
     setOpen(true);
   };
 
-  const showDetail = (customer) => {
+  const showDetail = (company) => {
     document.getElementById("my_modal_5").showModal();
-    setSelectedCustomer(customer);
+    setSelectedCompany(company);
   };
 
   const onClose = () => {
-    setSelectedCustomer(null);
+    setSelectedCompany(null);
     setOpen(false);
   };
 
-  const fetchCustomers = async () => {
+  const fetchCompanies = async () => {
     try {
-      const response = await getTableData("CUSTOMER"); 
+      const response = await getTableData("COMPANIES");
       const data = response.data.data;
-      setCustomers(data);
+      setCompanies(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
-      message.error("Failed to fetch customers");
+      console.error("Error fetching companies:", error);
+      message.error("Failed to fetch companies");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchCompanies();
   }, []);
 
-
   const onFinish = async (values) => {
-    const customerData = {
-      C_NAME: values.name,
-      C_AGE: values.age,
-      C_ADDRESS: values.address,
-      C_CONTACT: values.contact,
+    const companyData = {
+      BATCH: values.batch,
+      NAME: values.name,
+      ESTABLISHED: values.established,
+      GROWTH: values.growth,
+      TOTAL_GENERICS: values.totalGenerics,
+      HEADQUARTER: values.headquarter,
+      EMAIL: values.email,
     };
 
     try {
-      if (selectedCustomer) {
-        await updateData("CUSTOMER", selectedCustomer.C_ID, customerData);  
-        message.success("Customer updated successfully");
+      if (selectedCompany) {
+        await updateData("COMPANIES", selectedCompany.BATCH, companyData);
+        message.success("Company updated successfully");
       } else {
-        await createCustomer(customerData); 
-        message.success("Customer created successfully");
+        await createCompanies(companyData);
+        message.success("Company created successfully");
       }
-      fetchCustomers();
+      fetchCompanies();
       onClose();
     } catch (error) {
-      console.error("Error updating customer:", error);
-      message.error("Failed to update customer");
+      console.error("Error updating company:", error);
+      message.error("Failed to update company");
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+
   // Logic for pagination
-  const indexOfLastCustomer = currentPage * CustomersPerPage;
-  const indexOfFirstCustomer = indexOfLastCustomer - CustomersPerPage;
-  const currentCustomers = Array.isArray(customers)
-    ? customers.slice(indexOfFirstCustomer, indexOfLastCustomer)
+  const indexOfLastCompany = currentPage * CompaniesPerPage;
+  const indexOfFirstCompany = indexOfLastCompany - CompaniesPerPage;
+  const currentCompanies = Array.isArray(companies)
+    ? companies.slice(indexOfFirstCompany, indexOfLastCompany)
     : [];
 
   // Change page
@@ -95,43 +99,45 @@ const GetCustomer = () => {
         </div>
         <div className="flex justify-center items-center p-4 rounded-md mb-7 border-2 border-black shadow-xl">
           <h4 className="text-2xl font-semibold">
-          Total Customers: {customers?.length}
+          Total Companies: {companies?.length}
           </h4>
         </div>
       </div>
       <div className=" hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
         <div className="flex justify-between">
-          <h4 className="text-2xl font-semibold">Customers Panel</h4>
+          <h4 className="text-2xl font-semibold">Companies Panel</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
               <tr className="font-semibold text-base text-center">
                 <th>SL</th>
-                <th>ID</th>
+                <th>BATCH</th>
                 <th>Name</th>
-                <th>Age</th>
-                <th>Address</th>
-                <th>Contact</th>
-                <th>Total Serve</th>
+                <th>Established</th>
+                <th>Growth (%)</th>
+                <th>Total Generics</th>
+                <th>Headquarter</th>
+                <th>Email</th>
                 <th>Details</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody className="text-center">
-              {currentCustomers.map((customer, index) => (
-                <tr key={customer.C_ID}>
+              {currentCompanies.map((company, index) => (
+                <tr key={company.BATCH}>
                   <td>{index + 1}</td>
-                  <td>{customer.C_ID}</td>
-                  <td>{customer.C_NAME}</td>
-                  <td>{customer.C_AGE}</td>
-                  <td>{customer.C_ADDRESS}</td>
-                  <td>{customer.C_CONTACT}</td>
-                  <td>{customer.C_SERVE}</td>
+                  <td>{company.BATCH}</td>
+                  <td>{company.NAME}</td>
+                  <td>{new Date(company.ESTABLISHED).toLocaleDateString()}</td>
+                  <td>{company.GROWTH}</td>
+                  <td>{company.TOTAL_GENERICS}</td>
+                  <td>{company.HEADQUARTER}</td>
+                  <td>{company.EMAIL}</td>
                   <td>
                     <button
                       className="btn btn-info text-white"
-                      onClick={() => showDetail(customer)}
+                      onClick={() => showDetail(company)}
                     >
                       Details
                     </button>
@@ -148,40 +154,46 @@ const GetCustomer = () => {
                         <div className="mt-3">
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              ID:
+                              BATCH:
                             </span>{" "}
-                            {selectedCustomer?.C_ID}
+                            {selectedCompany?.BATCH}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
                               Name:
                             </span>{" "}
-                            {selectedCustomer?.C_NAME}
+                            {selectedCompany?.NAME}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Age:
+                              Established:
                             </span>{" "}
-                            {selectedCustomer?.C_AGE}
+                            {new Date(selectedCompany?.ESTABLISHED).toLocaleDateString()}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Contact:
+                              Growth:
                             </span>{" "}
-                            {selectedCustomer?.C_CONTACT}
+                            {selectedCompany?.GROWTH}
                           </h1>
                         </div>
                         <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                            Total Serve:
+                            Total Generics:
                             </span>{" "}
-                            {selectedCustomer?.C_SERVE}
+                            {selectedCompany?.TOTAL_GENERICS}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Address:
+                              Headquarter:
                             </span>{" "}
-                            {selectedCustomer?.C_ADDRESS}
+                            {selectedCompany?.HEADQUARTER}
+                          </h1>
+                          <h1 className="text-lg">
+                            <span className="font-semibold text-xl">
+                              Email:
+                            </span>{" "}
+                            {selectedCompany?.EMAIL}
                           </h1>
                         <div className="modal-action">
                           <form method="dialog">
@@ -202,7 +214,7 @@ const GetCustomer = () => {
                       <>
                         <button
                           className="btn btn-warning text-white"
-                          onClick={() => showDrawer(customer)}
+                          onClick={() => showDrawer(company)}
                         >
                           <GrEdit />
                           Edit
@@ -216,43 +228,57 @@ const GetCustomer = () => {
                           <Form
                             layout="vertical"
                             initialValues={{
-                              name: selectedCustomer?.C_NAME,
-                              age: selectedCustomer?.C_AGE,
-                              address: selectedCustomer?.C_ADDRESS,
-                              contact: selectedCustomer?.C_CONTACT,
-                              serve: selectedCustomer?.C_SERVE,
+                              batch: selectedCompany?.BATCH,
+                              name: selectedCompany?.NAME,
+                              established: selectedCompany?.ESTABLISHED,
+                              growth: selectedCompany?.GROWTH,
+                              totalGenerics: selectedCompany?.TOTAL_GENERICS,
+                              headquarter: selectedCompany?.HEADQUARTER,
+                              email: selectedCompany?.EMAIL,
                             }}
                             onFinish={onFinish}
                             onFinishFailed={onFinishFailed}
                           >
                             <Row gutter={16}>
                               <Col span={12}>
+                                <Form.Item name="batch" label="Batch">
+                                  <Input placeholder="Please enter company batch" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
                                 <Form.Item name="name" label="Name">
-                                  <Input placeholder="Please enter user name" />
-                                </Form.Item>
-                              </Col>
-                              <Col span={12}>
-                                <Form.Item name="age" label="Age">
-                                  <Input placeholder="Please enter user age" />
+                                  <Input placeholder="Please enter company name" />
                                 </Form.Item>
                               </Col>
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="address" label="Address">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="established" label="Established">
+                                  <Input placeholder="Please enter established date" />
                                 </Form.Item>
                               </Col>
                               <Col span={12}>
-                                <Form.Item name="contact" label="Contact">
-                                  <Input placeholder="Please enter user contact" />
+                                <Form.Item name="growth" label="Growth">
+                                  <Input placeholder="Please enter growth percentage" />
                                 </Form.Item>
                               </Col>
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="serve" label="serve">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="totalGenerics" label="Total Generics">
+                                  <Input placeholder="Please enter total generics" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item name="headquarter" label="Headquarter">
+                                  <Input placeholder="Please enter headquarter" />
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                            <Row gutter={16}>
+                              <Col span={12}>
+                                <Form.Item name="email" label="Email">
+                                  <Input placeholder="Please enter email" />
                                 </Form.Item>
                               </Col>
                             </Row>
@@ -283,7 +309,7 @@ const GetCustomer = () => {
             &larr; Previous page
           </button>
           {Array.from(
-            { length: Math.ceil(customers.length / CustomersPerPage) },
+            { length: Math.ceil(companies.length / CompaniesPerPage) },
             (_, i) => (
               <button
                 key={i}
@@ -300,7 +326,7 @@ const GetCustomer = () => {
             className="join-item btn btn-outline mr-2"
             onClick={() => paginate(currentPage + 1)}
             disabled={
-              currentPage === Math.ceil(customers.length / CustomersPerPage)
+              currentPage === Math.ceil(companies.length / CompaniesPerPage)
             }
           >
             Next &rarr;
@@ -311,4 +337,4 @@ const GetCustomer = () => {
   );
 };
 
-export default GetCustomer;
+export default GetCompanies;

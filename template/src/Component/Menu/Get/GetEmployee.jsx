@@ -1,84 +1,86 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
 import {
-  createCustomer,
+  createEmployees,
   getTableData,
   updateData,
 } from "../apiService";
 import { GrEdit } from "react-icons/gr";
-import { MdOutlineDeleteForever } from "react-icons/md";
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import { Link } from "react-router-dom";
 
-const GetCustomer = () => {
-  const [customers, setCustomers] = useState([]);
+const GetEmployee = () => {
+  const [employees, setEmployees] = useState([]);
+  console.log("🚀 ~ GetEmployee ~ employees:", employees)
   const [open, setOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const CustomersPerPage = 10;
+  const EmployeesPerPage = 10;
 
-  const showDrawer = (customer) => {
-    setSelectedCustomer(customer);
+  const showDrawer = (employee) => {
+    setSelectedEmployee(employee);
     setOpen(true);
   };
 
-  const showDetail = (customer) => {
+  const showDetail = (employee) => {
     document.getElementById("my_modal_5").showModal();
-    setSelectedCustomer(customer);
+    setSelectedEmployee(employee);
   };
 
   const onClose = () => {
-    setSelectedCustomer(null);
+    setSelectedEmployee(null);
     setOpen(false);
   };
 
-  const fetchCustomers = async () => {
+  const fetchEmployees = async () => {
     try {
-      const response = await getTableData("CUSTOMER"); 
+      const response = await getTableData("EMPLOYEES"); 
       const data = response.data.data;
-      setCustomers(data);
+      setEmployees(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
-      message.error("Failed to fetch customers");
+      console.error("Error fetching employees:", error);
+      message.error("Failed to fetch employees");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchEmployees();
   }, []);
 
 
   const onFinish = async (values) => {
-    const customerData = {
-      C_NAME: values.name,
-      C_AGE: values.age,
-      C_ADDRESS: values.address,
-      C_CONTACT: values.contact,
+    const employeeData = {
+      E_NAME: values.name,
+      E_AGE: values.age,
+      E_BLOOD: values.blood,
+      E_SALARY: values.salary,
+      E_PHONE: values.phone,
+      E_DESIGNATION: values.designation,
     };
 
     try {
-      if (selectedCustomer) {
-        await updateData("CUSTOMER", selectedCustomer.C_ID, customerData);  
-        message.success("Customer updated successfully");
+      if (selectedEmployee) {
+        await updateData("EMPLOYEES", selectedEmployee.E_ID, employeeData);  
+        message.success("Employee updated successfully");
       } else {
-        await createCustomer(customerData); 
-        message.success("Customer created successfully");
+        await createEmployees(employeeData); 
+        message.success("Employee created successfully");
       }
-      fetchCustomers();
+      fetchEmployees();
       onClose();
     } catch (error) {
-      console.error("Error updating customer:", error);
-      message.error("Failed to update customer");
+      console.error("Error updating employee:", error);
+      message.error("Failed to update employee");
     }
   };
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
   // Logic for pagination
-  const indexOfLastCustomer = currentPage * CustomersPerPage;
-  const indexOfFirstCustomer = indexOfLastCustomer - CustomersPerPage;
-  const currentCustomers = Array.isArray(customers)
-    ? customers.slice(indexOfFirstCustomer, indexOfLastCustomer)
+  const indexOfLastEmployee = currentPage * EmployeesPerPage;
+  const indexOfFirstEmployee = indexOfLastEmployee - EmployeesPerPage;
+  const currentEmployees = Array.isArray(employees)
+    ? employees.slice(indexOfFirstEmployee, indexOfLastEmployee)
     : [];
 
   // Change page
@@ -95,13 +97,13 @@ const GetCustomer = () => {
         </div>
         <div className="flex justify-center items-center p-4 rounded-md mb-7 border-2 border-black shadow-xl">
           <h4 className="text-2xl font-semibold">
-          Total Customers: {customers?.length}
+          Total Employees: {employees?.length}
           </h4>
         </div>
       </div>
       <div className=" hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
         <div className="flex justify-between">
-          <h4 className="text-2xl font-semibold">Customers Panel</h4>
+          <h4 className="text-2xl font-semibold">Employees Panel</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
@@ -111,27 +113,29 @@ const GetCustomer = () => {
                 <th>ID</th>
                 <th>Name</th>
                 <th>Age</th>
-                <th>Address</th>
-                <th>Contact</th>
-                <th>Total Serve</th>
+                <th>Blood Group</th>
+                <th>Salary</th>
+                <th>Phone</th>
+                <th>Designation</th>
                 <th>Details</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody className="text-center">
-              {currentCustomers.map((customer, index) => (
-                <tr key={customer.C_ID}>
+              {currentEmployees.map((employee, index) => (
+                <tr key={employee.E_ID}>
                   <td>{index + 1}</td>
-                  <td>{customer.C_ID}</td>
-                  <td>{customer.C_NAME}</td>
-                  <td>{customer.C_AGE}</td>
-                  <td>{customer.C_ADDRESS}</td>
-                  <td>{customer.C_CONTACT}</td>
-                  <td>{customer.C_SERVE}</td>
+                  <td>{employee.E_ID}</td>
+                  <td>{employee.E_NAME}</td>
+                  <td>{employee.E_AGE}</td>
+                  <td>{employee.E_BLOOD}</td>
+                  <td>{employee.E_SALARY}</td>
+                  <td>{employee.E_PHONE}</td>
+                  <td>{employee.E_DESIGNATION}</td>
                   <td>
                     <button
                       className="btn btn-info text-white"
-                      onClick={() => showDetail(customer)}
+                      onClick={() => showDetail(employee)}
                     >
                       Details
                     </button>
@@ -150,38 +154,44 @@ const GetCustomer = () => {
                             <span className="font-semibold text-xl">
                               ID:
                             </span>{" "}
-                            {selectedCustomer?.C_ID}
+                            {selectedEmployee?.E_ID}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
                               Name:
                             </span>{" "}
-                            {selectedCustomer?.C_NAME}
+                            {selectedEmployee?.E_NAME}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
                               Age:
                             </span>{" "}
-                            {selectedCustomer?.C_AGE}
+                            {selectedEmployee?.E_AGE}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Contact:
+                              Blood Group:
                             </span>{" "}
-                            {selectedCustomer?.C_CONTACT}
+                            {selectedEmployee?.E_BLOOD}
                           </h1>
                         </div>
                         <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                            Total Serve:
+                            Salary:
                             </span>{" "}
-                            {selectedCustomer?.C_SERVE}
+                            {selectedEmployee?.E_SALARY}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Address:
+                              Phone:
                             </span>{" "}
-                            {selectedCustomer?.C_ADDRESS}
+                            {selectedEmployee?.E_PHONE}
+                          </h1>
+                          <h1 className="text-lg">
+                            <span className="font-semibold text-xl">
+                              Designation:
+                            </span>{" "}
+                            {selectedEmployee?.E_DESIGNATION}
                           </h1>
                         <div className="modal-action">
                           <form method="dialog">
@@ -202,7 +212,7 @@ const GetCustomer = () => {
                       <>
                         <button
                           className="btn btn-warning text-white"
-                          onClick={() => showDrawer(customer)}
+                          onClick={() => showDrawer(employee)}
                         >
                           <GrEdit />
                           Edit
@@ -216,11 +226,12 @@ const GetCustomer = () => {
                           <Form
                             layout="vertical"
                             initialValues={{
-                              name: selectedCustomer?.C_NAME,
-                              age: selectedCustomer?.C_AGE,
-                              address: selectedCustomer?.C_ADDRESS,
-                              contact: selectedCustomer?.C_CONTACT,
-                              serve: selectedCustomer?.C_SERVE,
+                              name: selectedEmployee?.E_NAME,
+                              age: selectedEmployee?.E_AGE,
+                              blood: selectedEmployee?.E_BLOOD,
+                              salary: selectedEmployee?.E_SALARY,
+                              phone: selectedEmployee?.E_PHONE,
+                              designation: selectedEmployee?.E_DESIGNATION,
                             }}
                             onFinish={onFinish}
                             onFinishFailed={onFinishFailed}
@@ -239,20 +250,25 @@ const GetCustomer = () => {
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="address" label="Address">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="blood" label="Blood Group">
+                                  <Input placeholder="Please enter blood group" />
                                 </Form.Item>
                               </Col>
                               <Col span={12}>
-                                <Form.Item name="contact" label="Contact">
-                                  <Input placeholder="Please enter user contact" />
+                                <Form.Item name="salary" label="Salary">
+                                  <Input placeholder="Please enter user Salary" />
                                 </Form.Item>
                               </Col>
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="serve" label="serve">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="phone" label="Phone">
+                                  <Input placeholder="Please enter Phone" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item name="designation" label="Designation">
+                                  <Input placeholder="Please enter Designation" />
                                 </Form.Item>
                               </Col>
                             </Row>
@@ -283,7 +299,7 @@ const GetCustomer = () => {
             &larr; Previous page
           </button>
           {Array.from(
-            { length: Math.ceil(customers.length / CustomersPerPage) },
+            { length: Math.ceil(employees.length / EmployeesPerPage) },
             (_, i) => (
               <button
                 key={i}
@@ -300,7 +316,7 @@ const GetCustomer = () => {
             className="join-item btn btn-outline mr-2"
             onClick={() => paginate(currentPage + 1)}
             disabled={
-              currentPage === Math.ceil(customers.length / CustomersPerPage)
+              currentPage === Math.ceil(employees.length / EmployeesPerPage)
             }
           >
             Next &rarr;
@@ -311,4 +327,4 @@ const GetCustomer = () => {
   );
 };
 
-export default GetCustomer;
+export default GetEmployee;

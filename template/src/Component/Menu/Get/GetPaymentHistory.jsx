@@ -10,75 +10,79 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import { Link } from "react-router-dom";
 
-const GetCustomer = () => {
-  const [customers, setCustomers] = useState([]);
+const GetPaymentHistory = () => {
+  const [paymentHistory, setPaymentHistory] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedPayment, setSelectedPayment] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const CustomersPerPage = 10;
+  const paymentsPerPage = 10;
 
-  const showDrawer = (customer) => {
-    setSelectedCustomer(customer);
+  const showDrawer = (payment) => {
+    setSelectedPayment(payment);
     setOpen(true);
   };
 
-  const showDetail = (customer) => {
+  const showDetail = (payment) => {
     document.getElementById("my_modal_5").showModal();
-    setSelectedCustomer(customer);
+    setSelectedPayment(payment);
   };
 
   const onClose = () => {
-    setSelectedCustomer(null);
+    setSelectedPayment(null);
     setOpen(false);
   };
 
-  const fetchCustomers = async () => {
+  const fetchPaymentHistory = async () => {
     try {
-      const response = await getTableData("CUSTOMER"); 
+      const response = await getTableData("PAYMENT_HISTORY");
       const data = response.data.data;
-      setCustomers(data);
+      setPaymentHistory(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
-      message.error("Failed to fetch customers");
+      console.error("Error fetching payment history:", error);
+      message.error("Failed to fetch payment history");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchPaymentHistory();
   }, []);
 
-
   const onFinish = async (values) => {
-    const customerData = {
-      C_NAME: values.name,
-      C_AGE: values.age,
-      C_ADDRESS: values.address,
-      C_CONTACT: values.contact,
+    const paymentData = {
+      M_ID: values.mId,
+      M_NAME: values.mName,
+      C_ID: values.cId,
+      D_ID: values.dId,
+      TAKEN_DATE: values.takenDate,
+      M_QUANTITY: values.mQuantity,
+      SERVED_BY: values.servedBy,
     };
 
     try {
-      if (selectedCustomer) {
-        await updateData("CUSTOMER", selectedCustomer.C_ID, customerData);  
-        message.success("Customer updated successfully");
+      if (selectedPayment) {
+        await updateData("PAYMENT_HISTORY", selectedPayment.M_ID, paymentData);
+        message.success("Payment updated successfully");
       } else {
-        await createCustomer(customerData); 
-        message.success("Customer created successfully");
+        await createCustomer(paymentData); // Adjust this to the correct API call for creating payment history if needed
+        message.success("Payment created successfully");
       }
-      fetchCustomers();
+      fetchPaymentHistory();
       onClose();
     } catch (error) {
-      console.error("Error updating customer:", error);
-      message.error("Failed to update customer");
+      console.error("Error updating payment:", error);
+      message.error("Failed to update payment");
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+
   // Logic for pagination
-  const indexOfLastCustomer = currentPage * CustomersPerPage;
-  const indexOfFirstCustomer = indexOfLastCustomer - CustomersPerPage;
-  const currentCustomers = Array.isArray(customers)
-    ? customers.slice(indexOfFirstCustomer, indexOfLastCustomer)
+  const indexOfLastPayment = currentPage * paymentsPerPage;
+  const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage;
+  const currentPayments = Array.isArray(paymentHistory)
+    ? paymentHistory.slice(indexOfFirstPayment, indexOfLastPayment)
     : [];
 
   // Change page
@@ -95,43 +99,45 @@ const GetCustomer = () => {
         </div>
         <div className="flex justify-center items-center p-4 rounded-md mb-7 border-2 border-black shadow-xl">
           <h4 className="text-2xl font-semibold">
-          Total Customers: {customers?.length}
+          Total Payments: {paymentHistory?.length}
           </h4>
         </div>
       </div>
       <div className=" hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
         <div className="flex justify-between">
-          <h4 className="text-2xl font-semibold">Customers Panel</h4>
+          <h4 className="text-2xl font-semibold">Payment History Panel</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <thead>
               <tr className="font-semibold text-base text-center">
                 <th>SL</th>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Address</th>
-                <th>Contact</th>
-                <th>Total Serve</th>
+                <th>Medicine ID</th>
+                <th>Medicine Name</th>
+                <th>Customer ID</th>
+                <th>Doctor ID</th>
+                <th>Taken Date</th>
+                <th>Quantity</th>
+                <th>Served By</th>
                 <th>Details</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody className="text-center">
-              {currentCustomers.map((customer, index) => (
-                <tr key={customer.C_ID}>
+              {currentPayments.map((payment, index) => (
+                <tr key={payment.M_ID}>
                   <td>{index + 1}</td>
-                  <td>{customer.C_ID}</td>
-                  <td>{customer.C_NAME}</td>
-                  <td>{customer.C_AGE}</td>
-                  <td>{customer.C_ADDRESS}</td>
-                  <td>{customer.C_CONTACT}</td>
-                  <td>{customer.C_SERVE}</td>
+                  <td>{payment.M_ID}</td>
+                  <td>{payment.M_NAME}</td>
+                  <td>{payment.C_ID}</td>
+                  <td>{payment.D_ID}</td>
+                  <td>{new Date(payment.TAKEN_DATE).toLocaleDateString()}</td>
+                  <td>{payment.M_QUANTITY}</td>
+                  <td>{payment.SERVED_BY}</td>
                   <td>
                     <button
                       className="btn btn-info text-white"
-                      onClick={() => showDetail(customer)}
+                      onClick={() => showDetail(payment)}
                     >
                       Details
                     </button>
@@ -148,41 +154,47 @@ const GetCustomer = () => {
                         <div className="mt-3">
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              ID:
+                              Medicine ID:
                             </span>{" "}
-                            {selectedCustomer?.C_ID}
+                            {selectedPayment?.M_ID}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Name:
+                              Medicine Name:
                             </span>{" "}
-                            {selectedCustomer?.C_NAME}
+                            {selectedPayment?.M_NAME}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Age:
+                              Customer ID:
                             </span>{" "}
-                            {selectedCustomer?.C_AGE}
+                            {selectedPayment?.C_ID}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Contact:
+                              Doctor ID:
                             </span>{" "}
-                            {selectedCustomer?.C_CONTACT}
+                            {selectedPayment?.D_ID}
                           </h1>
                         </div>
                         <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                            Total Serve:
-                            </span>{" "}
-                            {selectedCustomer?.C_SERVE}
-                          </h1>
-                          <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              Address:
-                            </span>{" "}
-                            {selectedCustomer?.C_ADDRESS}
-                          </h1>
+                          <span className="font-semibold text-xl">
+                            Quantity:
+                          </span>{" "}
+                          {selectedPayment?.M_QUANTITY}
+                        </h1>
+                        <h1 className="text-lg">
+                          <span className="font-semibold text-xl">
+                            Taken Date:
+                          </span>{" "}
+                          {new Date(selectedPayment?.TAKEN_DATE).toLocaleDateString()}
+                        </h1>
+                        <h1 className="text-lg">
+                          <span className="font-semibold text-xl">
+                            Served By:
+                          </span>{" "}
+                          {selectedPayment?.SERVED_BY}
+                        </h1>
                         <div className="modal-action">
                           <form method="dialog">
                             <button className="btn btn-error text-white">
@@ -202,7 +214,7 @@ const GetCustomer = () => {
                       <>
                         <button
                           className="btn btn-warning text-white"
-                          onClick={() => showDrawer(customer)}
+                          onClick={() => showDrawer(payment)}
                         >
                           <GrEdit />
                           Edit
@@ -216,43 +228,57 @@ const GetCustomer = () => {
                           <Form
                             layout="vertical"
                             initialValues={{
-                              name: selectedCustomer?.C_NAME,
-                              age: selectedCustomer?.C_AGE,
-                              address: selectedCustomer?.C_ADDRESS,
-                              contact: selectedCustomer?.C_CONTACT,
-                              serve: selectedCustomer?.C_SERVE,
+                              mId: selectedPayment?.M_ID,
+                              mName: selectedPayment?.M_NAME,
+                              cId: selectedPayment?.C_ID,
+                              dId: selectedPayment?.D_ID,
+                              takenDate: selectedPayment?.TAKEN_DATE,
+                              mQuantity: selectedPayment?.M_QUANTITY,
+                              servedBy: selectedPayment?.SERVED_BY,
                             }}
                             onFinish={onFinish}
                             onFinishFailed={onFinishFailed}
                           >
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="name" label="Name">
-                                  <Input placeholder="Please enter user name" />
+                                <Form.Item name="mId" label="Medicine ID">
+                                  <Input placeholder="Please enter medicine ID" />
                                 </Form.Item>
                               </Col>
                               <Col span={12}>
-                                <Form.Item name="age" label="Age">
-                                  <Input placeholder="Please enter user age" />
-                                </Form.Item>
-                              </Col>
-                            </Row>
-                            <Row gutter={16}>
-                              <Col span={12}>
-                                <Form.Item name="address" label="Address">
-                                  <Input placeholder="Please enter Email" />
-                                </Form.Item>
-                              </Col>
-                              <Col span={12}>
-                                <Form.Item name="contact" label="Contact">
-                                  <Input placeholder="Please enter user contact" />
+                                <Form.Item name="mName" label="Medicine Name">
+                                  <Input placeholder="Please enter medicine name" />
                                 </Form.Item>
                               </Col>
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="serve" label="serve">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="cId" label="Customer ID">
+                                  <Input placeholder="Please enter customer ID" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item name="dId" label="Doctor ID">
+                                  <Input placeholder="Please enter doctor ID" />
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                            <Row gutter={16}>
+                              <Col span={12}>
+                                <Form.Item name="takenDate" label="Taken Date">
+                                  <Input placeholder="Please enter taken date" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item name="mQuantity" label="Quantity">
+                                  <Input placeholder="Please enter quantity" />
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                            <Row gutter={16}>
+                              <Col span={12}>
+                                <Form.Item name="servedBy" label="Served By">
+                                  <Input placeholder="Please enter served by" />
                                 </Form.Item>
                               </Col>
                             </Row>
@@ -283,7 +309,7 @@ const GetCustomer = () => {
             &larr; Previous page
           </button>
           {Array.from(
-            { length: Math.ceil(customers.length / CustomersPerPage) },
+            { length: Math.ceil(paymentHistory.length / paymentsPerPage) },
             (_, i) => (
               <button
                 key={i}
@@ -300,7 +326,7 @@ const GetCustomer = () => {
             className="join-item btn btn-outline mr-2"
             onClick={() => paginate(currentPage + 1)}
             disabled={
-              currentPage === Math.ceil(customers.length / CustomersPerPage)
+              currentPage === Math.ceil(paymentHistory.length / paymentsPerPage)
             }
           >
             Next &rarr;
@@ -311,4 +337,4 @@ const GetCustomer = () => {
   );
 };
 
-export default GetCustomer;
+export default GetPaymentHistory;

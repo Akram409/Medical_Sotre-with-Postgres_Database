@@ -5,11 +5,20 @@
             "server": "localhost",
             "port": 5432,
             "driver": "PostgreSQL",
-            "name": "Medical Sotre",
-            "password": "akram2002",
+            "name": "Medical Store",
             "database": "mdstore",
             "username": "postgres",
-            "connectionTimeout": 30
+            "password": "akram2002"
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "Testing DB",
+            "database": "testing",
+            "username": "postgres",
+            "password": "akram2002"
         }
     ]
 }

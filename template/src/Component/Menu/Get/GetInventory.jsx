@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { message } from "antd";
 import {
-  createCustomer,
+  createInventory,
   getTableData,
   updateData,
 } from "../apiService";
@@ -10,75 +10,78 @@ import { MdOutlineDeleteForever } from "react-icons/md";
 import { Button, Col, Drawer, Form, Input, Row, Space } from "antd";
 import { Link } from "react-router-dom";
 
-const GetCustomer = () => {
-  const [customers, setCustomers] = useState([]);
+const GetInventory = () => {
+  const [inventories, setInventories] = useState([]);
   const [open, setOpen] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedInventory, setSelectedInventory] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const CustomersPerPage = 10;
+  const InventoriesPerPage = 10;
 
-  const showDrawer = (customer) => {
-    setSelectedCustomer(customer);
+  const showDrawer = (inventory) => {
+    setSelectedInventory(inventory);
     setOpen(true);
   };
 
-  const showDetail = (customer) => {
+  const showDetail = (inventory) => {
     document.getElementById("my_modal_5").showModal();
-    setSelectedCustomer(customer);
+    setSelectedInventory(inventory);
   };
 
   const onClose = () => {
-    setSelectedCustomer(null);
+    setSelectedInventory(null);
     setOpen(false);
   };
 
-  const fetchCustomers = async () => {
+  const fetchInventories = async () => {
     try {
-      const response = await getTableData("CUSTOMER"); 
+      const response = await getTableData("INVENTORY");
       const data = response.data.data;
-      setCustomers(data);
+      setInventories(data);
     } catch (error) {
-      console.error("Error fetching customers:", error);
-      message.error("Failed to fetch customers");
+      console.error("Error fetching inventories:", error);
+      message.error("Failed to fetch inventories");
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchInventories();
   }, []);
 
-
   const onFinish = async (values) => {
-    const customerData = {
-      C_NAME: values.name,
-      C_AGE: values.age,
-      C_ADDRESS: values.address,
-      C_CONTACT: values.contact,
+    const inventoryData = {
+      M_NAME: values.name,
+      M_TYPE: values.type,
+      M_PRICE: values.price,
+      M_IMPORT_DATE: values.importDate,
+      M_EXPIRE_DATE: values.expireDate,
+      M_REMAIN: values.remain,
     };
 
     try {
-      if (selectedCustomer) {
-        await updateData("CUSTOMER", selectedCustomer.C_ID, customerData);  
-        message.success("Customer updated successfully");
+      if (selectedInventory) {
+        await updateData("INVENTORY", selectedInventory.M_ID, inventoryData);
+        message.success("Inventory updated successfully");
       } else {
-        await createCustomer(customerData); 
-        message.success("Customer created successfully");
+        await createInventory(inventoryData);
+        message.success("Inventory created successfully");
       }
-      fetchCustomers();
+      fetchInventories();
       onClose();
     } catch (error) {
-      console.error("Error updating customer:", error);
-      message.error("Failed to update customer");
+      console.error("Error updating inventory:", error);
+      message.error("Failed to update inventory");
     }
   };
+
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
+
   // Logic for pagination
-  const indexOfLastCustomer = currentPage * CustomersPerPage;
-  const indexOfFirstCustomer = indexOfLastCustomer - CustomersPerPage;
-  const currentCustomers = Array.isArray(customers)
-    ? customers.slice(indexOfFirstCustomer, indexOfLastCustomer)
+  const indexOfLastInventory = currentPage * InventoriesPerPage;
+  const indexOfFirstInventory = indexOfLastInventory - InventoriesPerPage;
+  const currentInventories = Array.isArray(inventories)
+    ? inventories.slice(indexOfFirstInventory, indexOfLastInventory)
     : [];
 
   // Change page
@@ -95,13 +98,13 @@ const GetCustomer = () => {
         </div>
         <div className="flex justify-center items-center p-4 rounded-md mb-7 border-2 border-black shadow-xl">
           <h4 className="text-2xl font-semibold">
-          Total Customers: {customers?.length}
+            Total Inventories: {inventories?.length}
           </h4>
         </div>
       </div>
       <div className=" hidden lg:block p-4 rounded-md border-2 border-black shadow-xl">
         <div className="flex justify-between">
-          <h4 className="text-2xl font-semibold">Customers Panel</h4>
+          <h4 className="text-2xl font-semibold">Inventories Panel</h4>
         </div>
         <div className="overflow-x-auto">
           <table className="table w-full">
@@ -110,28 +113,30 @@ const GetCustomer = () => {
                 <th>SL</th>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Age</th>
-                <th>Address</th>
-                <th>Contact</th>
-                <th>Total Serve</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Import Date</th>
+                <th>Expire Date</th>
+                <th>Remain</th>
                 <th>Details</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody className="text-center">
-              {currentCustomers.map((customer, index) => (
-                <tr key={customer.C_ID}>
+              {currentInventories.map((inventory, index) => (
+                <tr key={inventory.M_ID}>
                   <td>{index + 1}</td>
-                  <td>{customer.C_ID}</td>
-                  <td>{customer.C_NAME}</td>
-                  <td>{customer.C_AGE}</td>
-                  <td>{customer.C_ADDRESS}</td>
-                  <td>{customer.C_CONTACT}</td>
-                  <td>{customer.C_SERVE}</td>
+                  <td>{inventory.M_ID}</td>
+                  <td>{inventory.M_NAME}</td>
+                  <td>{inventory.M_TYPE}</td>
+                  <td>{inventory.M_PRICE}</td>
+                  <td>{new Date(inventory.M_IMPORT_DATE).toLocaleDateString()}</td>
+                  <td>{new Date(inventory.M_EXPIRE_DATE).toLocaleDateString()}</td>
+                  <td>{inventory.M_REMAIN}</td>
                   <td>
                     <button
                       className="btn btn-info text-white"
-                      onClick={() => showDetail(customer)}
+                      onClick={() => showDetail(inventory)}
                     >
                       Details
                     </button>
@@ -150,39 +155,45 @@ const GetCustomer = () => {
                             <span className="font-semibold text-xl">
                               ID:
                             </span>{" "}
-                            {selectedCustomer?.C_ID}
+                            {selectedInventory?.M_ID}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
                               Name:
                             </span>{" "}
-                            {selectedCustomer?.C_NAME}
+                            {selectedInventory?.M_NAME}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Age:
+                              Type:
                             </span>{" "}
-                            {selectedCustomer?.C_AGE}
+                            {selectedInventory?.M_TYPE}
                           </h1>
                           <h1 className="text-lg">
                             <span className="font-semibold text-xl">
-                              Contact:
+                              Price:
                             </span>{" "}
-                            {selectedCustomer?.C_CONTACT}
+                            {selectedInventory?.M_PRICE}
+                          </h1>
+                          <h1 className="text-lg">
+                            <span className="font-semibold text-xl">
+                              Import Date:
+                            </span>{" "}
+                            {new Date(selectedInventory?.M_IMPORT_DATE).toLocaleDateString()}
+                          </h1>
+                          <h1 className="text-lg">
+                            <span className="font-semibold text-xl">
+                              Expire Date:
+                            </span>{" "}
+                            {new Date(selectedInventory?.M_EXPIRE_DATE).toLocaleDateString()}
+                          </h1>
+                          <h1 className="text-lg">
+                            <span className="font-semibold text-xl">
+                              Remain:
+                            </span>{" "}
+                            {selectedInventory?.M_REMAIN}
                           </h1>
                         </div>
-                        <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                            Total Serve:
-                            </span>{" "}
-                            {selectedCustomer?.C_SERVE}
-                          </h1>
-                          <h1 className="text-lg">
-                            <span className="font-semibold text-xl">
-                              Address:
-                            </span>{" "}
-                            {selectedCustomer?.C_ADDRESS}
-                          </h1>
                         <div className="modal-action">
                           <form method="dialog">
                             <button className="btn btn-error text-white">
@@ -202,7 +213,7 @@ const GetCustomer = () => {
                       <>
                         <button
                           className="btn btn-warning text-white"
-                          onClick={() => showDrawer(customer)}
+                          onClick={() => showDrawer(inventory)}
                         >
                           <GrEdit />
                           Edit
@@ -216,11 +227,12 @@ const GetCustomer = () => {
                           <Form
                             layout="vertical"
                             initialValues={{
-                              name: selectedCustomer?.C_NAME,
-                              age: selectedCustomer?.C_AGE,
-                              address: selectedCustomer?.C_ADDRESS,
-                              contact: selectedCustomer?.C_CONTACT,
-                              serve: selectedCustomer?.C_SERVE,
+                              name: selectedInventory?.M_NAME,
+                              type: selectedInventory?.M_TYPE,
+                              price: selectedInventory?.M_PRICE,
+                              importDate: selectedInventory?.M_IMPORT_DATE,
+                              expireDate: selectedInventory?.M_EXPIRE_DATE,
+                              remain: selectedInventory?.M_REMAIN,
                             }}
                             onFinish={onFinish}
                             onFinishFailed={onFinishFailed}
@@ -228,31 +240,36 @@ const GetCustomer = () => {
                             <Row gutter={16}>
                               <Col span={12}>
                                 <Form.Item name="name" label="Name">
-                                  <Input placeholder="Please enter user name" />
+                                  <Input placeholder="Please enter inventory name" />
                                 </Form.Item>
                               </Col>
                               <Col span={12}>
-                                <Form.Item name="age" label="Age">
-                                  <Input placeholder="Please enter user age" />
-                                </Form.Item>
-                              </Col>
-                            </Row>
-                            <Row gutter={16}>
-                              <Col span={12}>
-                                <Form.Item name="address" label="Address">
-                                  <Input placeholder="Please enter Email" />
-                                </Form.Item>
-                              </Col>
-                              <Col span={12}>
-                                <Form.Item name="contact" label="Contact">
-                                  <Input placeholder="Please enter user contact" />
+                                <Form.Item name="type" label="Type">
+                                  <Input placeholder="Please enter inventory type" />
                                 </Form.Item>
                               </Col>
                             </Row>
                             <Row gutter={16}>
                               <Col span={12}>
-                                <Form.Item name="serve" label="serve">
-                                  <Input placeholder="Please enter Email" />
+                                <Form.Item name="price" label="Price">
+                                  <Input placeholder="Please enter price" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item name="importDate" label="Import Date">
+                                  <Input placeholder="Please enter import date" />
+                                </Form.Item>
+                              </Col>
+                            </Row>
+                            <Row gutter={16}>
+                              <Col span={12}>
+                                <Form.Item name="expireDate" label="Expire Date">
+                                  <Input placeholder="Please enter expire date" />
+                                </Form.Item>
+                              </Col>
+                              <Col span={12}>
+                                <Form.Item name="remain" label="Remain">
+                                  <Input placeholder="Please enter remaining quantity" />
                                 </Form.Item>
                               </Col>
                             </Row>
@@ -283,7 +300,7 @@ const GetCustomer = () => {
             &larr; Previous page
           </button>
           {Array.from(
-            { length: Math.ceil(customers.length / CustomersPerPage) },
+            { length: Math.ceil(inventories.length / InventoriesPerPage) },
             (_, i) => (
               <button
                 key={i}
@@ -300,7 +317,7 @@ const GetCustomer = () => {
             className="join-item btn btn-outline mr-2"
             onClick={() => paginate(currentPage + 1)}
             disabled={
-              currentPage === Math.ceil(customers.length / CustomersPerPage)
+              currentPage === Math.ceil(inventories.length / InventoriesPerPage)
             }
           >
             Next &rarr;
@@ -311,4 +328,4 @@ const GetCustomer = () => {
   );
 };
 
-export default GetCustomer;
+export default GetInventory;

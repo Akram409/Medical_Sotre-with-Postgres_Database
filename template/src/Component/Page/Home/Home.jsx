@@ -9,18 +9,26 @@ import { Layout, Menu, theme } from "antd";
 import GetDoctor from "../../Menu/Get/GetDoctor";
 import GetCustomer from "../../Menu/Get/GetCustomer";
 import GetMEDICAL_SHOP from "../../Menu/Get/GetMEDICAL_SHOP";
+import GetEmployee from "../../Menu/Get/GetEmployee";
+import GetInventory from "../../Menu/Get/GetInventory";
+import GetCompanies from "../../Menu/Get/GetCompanies";
+import GetPaymentHistory from "../../Menu/Get/GetPaymentHistory";
+import GetSupplier from "../../Menu/Get/GetSupplier";
+import GetSupplyHistory from "../../Menu/Get/GetSupplyHistory";
+import SELECT from "../../Menu/QUERY/SELECT";
+import Abouts from "../../Menu/TEAM/Abouts";
+
 
 const { Header, Content, Sider } = Layout;
 
-const labels = ["Get", "Create", "Update", "Delete"];
+const labels = ["TABLE", "QUERY","TEAM"];
 const menus = [
-  ["Doctor", "Customer", "MEDICAL_SHOP", "EMPLOYEES", "INVENTORY", "COMPANIES", "PAYMENT_HISTORY", "SUPPLIER", "SUPPLY_HISTORY"],
-  ["Doctor", "Customer", "MEDICAL_SHOP", "EMPLOYEES", "INVENTORY", "COMPANIES", "PAYMENT_HISTORY", "SUPPLIER", "SUPPLY_HISTORY"],
-  ["Doctor", "Customer", "MEDICAL_SHOP", "EMPLOYEES", "INVENTORY", "COMPANIES", "PAYMENT_HISTORY", "SUPPLIER", "SUPPLY_HISTORY"],
-  ["Doctor", "Customer", "MEDICAL_SHOP", "EMPLOYEES", "INVENTORY", "COMPANIES", "PAYMENT_HISTORY", "SUPPLIER", "SUPPLY_HISTORY"]
+  ["DOCTOR", "CUSTOMER", "MEDICAL_SHOP", "EMPLOYEES", "INVENTORY", "COMPANIES", "PAYMENT_HISTORY", "SUPPLIER", "SUPPLY_HISTORY"],
+  ["SELECT"],
+  ["ABOUT"]
 ];
 
-const icons = [UserOutlined, LaptopOutlined, NotificationOutlined, UserOutlined];
+const icons = [UserOutlined, LaptopOutlined,LaptopOutlined];
 
 const items2 = icons.map((icon, index) => {
   const key = String(index + 1);
@@ -42,6 +50,14 @@ const componentMapping = {
   '0-0': <GetDoctor />,
   '0-1': <GetCustomer />,
   '0-2': <GetMEDICAL_SHOP />,
+  '0-3': <GetEmployee />,
+  '0-4': <GetInventory />,
+  '0-5': <GetCompanies />,
+  '0-6': <GetPaymentHistory />,
+  '0-7': <GetSupplier />,
+  '0-8': <GetSupplyHistory />,
+  '1-0': <SELECT />,
+  '2-0': <Abouts />
 };
 
 

@@ -1,35 +1,37 @@
 -------------------------Table Create Start------------
 
 -- Create TESTING table
-CREATE TABLE "TEST"
+CREATE TABLE "TESTING"
 (
     "TEST_NAME" VARCHAR(30),
-    "TEST_ID" INTEGER ,
-    "TEST_PHONE" NUMERIC(12,0)
+    "TEST_ID" INTEGER PRIMARY KEY,
+    "TEST_PHONE" NUMERIC(12,0),
+    -- CONSTRAINT "TEST_PK" ("TEST_ID")
 );
 
 -- Create DOCTOR table
 CREATE TABLE "DOCTOR"
 (
     "D_NAME" VARCHAR(30),
-    "D_ID" INTEGER NOT NULL,
+    "D_ID" BIGSERIAL,
     "D_PHONE" NUMERIC(12,0),
     "D_EMAIL" VARCHAR(40),
     "D_SPECIALIST" VARCHAR(40),
-    CONSTRAINT "DOCTOR_PK" PRIMARY KEY ("D_ID")
+    CONSTRAINT "DOCTOR_PK" PRIMARY KEY ("D_ID") -- find answer
 );
 
 -- Create CUSTOMER table
 CREATE TABLE "CUSTOMER"
 (
-    "C_ID" INTEGER NOT NULL,
+    "C_ID" BIGSERIAL,
     "C_NAME" VARCHAR(30),
     "C_AGE" INTEGER NOT NULL,
     "C_ADDRESS" VARCHAR(50),
     "C_CONTACT" NUMERIC(12,0) NOT NULL,
     "C_SERVE" INTEGER NOT NULL,
-    "D_ID" INTEGER,
+    "D_ID" INTEGER, -- problem (foreign key rel)
     CONSTRAINT "CUS_PK" PRIMARY KEY ("C_ID"),
+    CONSTRAINT "CUSTOMER_FK1" FOREIGN KEY ("D_ID") REFERENCES "DOCTOR" ("D_ID"),
     CONSTRAINT "CUSTOMER_CK1" CHECK ("C_AGE" >= 18)
 );
 
@@ -60,7 +62,7 @@ CREATE TABLE "EMPLOYEES"
 -- Create INVENTORY table
 CREATE TABLE "INVENTORY"
 (
-    "M_ID" INTEGER NOT NULL,
+    "M_ID" BIGSERIAL,
     "M_NAME" VARCHAR(40) NOT NULL,
     "M_TYPE" VARCHAR(40),
     "M_PRICE" NUMERIC(4,0) NOT NULL,
@@ -90,9 +92,9 @@ CREATE TABLE "PAYMENT_HISTORY"
 (
     "M_NAME" VARCHAR(50),
     "TAKEN_DATE" VARCHAR(40),
-    "M_ID" INTEGER NOT NULL,
-    "C_ID" INTEGER NOT NULL,
-    "D_ID" INTEGER,
+    "M_ID" BIGSERIAL,
+    "C_ID" BIGSERIAL,
+    "D_ID" BIGSERIAL,
     "M_QUANTITY" NUMERIC(2,0) NOT NULL,
     "SERVED_BY" VARCHAR(40),
     CONSTRAINT "MEDICINE_PK" PRIMARY KEY ("M_ID"),
@@ -137,9 +139,9 @@ VALUES
 -- Insert data into CUSTOMER table
 INSERT INTO "CUSTOMER" ("C_ID", "C_NAME", "C_AGE", "C_ADDRESS", "C_CONTACT", "C_SERVE", "D_ID")
 VALUES
-(1, 'Alice Johnson', 28, '123 Elm Street', 123456789012, 10, 1),
-(2, 'Bob Smith', 45, '456 Oak Avenue', 987654321012, 20, 2),
-(3, 'Charlie Brown', 35, '789 Pine Road', 456789123012, 30, 3);
+(6, 'Alice Hasan', 30, '123 Elm Street', 93.1738, 10, 1);
+
+
 
 -- Insert data into MEDICAL_SHOP table
 INSERT INTO "MEDICAL_SHOP" ("SHOP_BATCH", "SHOP_NAME", "SHOP_ADDRESS")
@@ -194,6 +196,9 @@ VALUES
 -------------------------Modify Table START------------
 ALTER TABLE "TEST" ADD COLUMN "product" BOOLEAN;
 ALTER TABLE "TEST" DROP COLUMN product;
+ALTER TABLE "CUSTOMER"
+ADD CONSTRAINT "CUSTOMER_FK1" FOREIGN KEY ("D_ID") REFERENCES "DOCTOR" ("D_ID");
+
 -------------------------Modify Table END------------
 
 -------------------------DROP Table START------------
@@ -248,7 +253,6 @@ SELECT * FROM "SUPPLY_HISTORY";
 
 -- Query find one data by unique thing
 SELECT * FROM "DOCTOR" WHERE "D_ID" = 1
-
 SELECT "D_NAME" FROM "DOCTOR";
 
 -- Query data from one column (D_NAME)
@@ -658,12 +662,6 @@ BEGIN
     WHERE s_id = p_supplier_id;
     RAISE NOTICE 'Supplier: %, Address: %', v_supplier_name, v_supplier_address;
 END $$;
-
-
-
-
-
-
 
 
 

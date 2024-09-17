@@ -8,56 +8,106 @@ const apiClient = axios.create({
 });
 
 // GET requests
-export const getDoctor = () => apiClient.get('/getDoctor');
-export const getCustomer = () => apiClient.get('/getCustomer');
-export const getMedicalShop = () => apiClient.get('/getMedicalShop');
-export const getEmployees = () => apiClient.get('/getEmployees');
-export const getInventory = () => apiClient.get('/getInventory');
-export const getCompanies = () => apiClient.get('/getCompanies');
-export const getPaymentHistory = () => apiClient.get('/getPaymentHistory');
-export const getSupplier = () => apiClient.get('/getSupplier');
-export const getSupplyHistory = () => apiClient.get('/getSupplyHistory');
-
-// GET by ID
-export const getDoctorById = (id) => apiClient.get(`/getDoctor/${id}`);
-export const getCustomerById = (id) => apiClient.get(`/getCustomer/${id}`);
-export const getMedicalShopById = (id) => apiClient.get(`/getMedicalShop/${id}`);
-export const getEmployeesById = (id) => apiClient.get(`/getEmployees/${id}`);
-export const getInventoryById = (id) => apiClient.get(`/getInventory/${id}`);
-export const getCompaniesById = (id) => apiClient.get(`/getCompanies/${id}`);
-export const getPaymentHistoryById = (id) => apiClient.get(`/getPaymentHistory/${id}`);
-export const getSupplierById = (id) => apiClient.get(`/getSupplier/${id}`);
-export const getSupplyHistoryById = (id) => apiClient.get(`/getSupplyHistory/${id}`);
+export const getTableData = (tableName) => apiClient.get(`/getTableData/${tableName}`);
+export const getSingleData = (tableName, id) => apiClient.get(`/getSingleData/${tableName}/${id}`);
 
 // POST requests
-export const createDoctor = (data) => apiClient.post('/createDoctor', data);
-export const createCustomer = (data) => apiClient.post('/createCustomer', data);
-export const createMedicalShop = (data) => apiClient.post('/createMedicalShop', data);
-export const createEmployees = (data) => apiClient.post('/createEmployees', data);
-export const createInventory = (data) => apiClient.post('/createInventory', data);
-export const createCompanies = (data) => apiClient.post('/createCompanies', data);
-export const createPaymentHistory = (data) => apiClient.post('/createPaymentHistory', data);
-export const createSupplier = (data) => apiClient.post('/createSupplier', data);
-export const createSupplyHistory = (data) => apiClient.post('/createSupplyHistory', data);
+export const addData = (tableName, data) => {
+  return apiClient.post(`/addData/${tableName}`, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+}
 
 // PUT requests
-export const updateDoctor = (id, data) => apiClient.put(`/updateDoctor/${id}`, data);
-export const updateCustomer = (id, data) => apiClient.put(`/updateCustomer/${id}`, data);
-export const updateMedicalShop = (id, data) => apiClient.put(`/updateMedicalShop/${id}`, data);
-export const updateEmployees = (id, data) => apiClient.put(`/updateEmployees/${id}`, data);
-export const updateInventory = (id, data) => apiClient.put(`/updateInventory/${id}`, data);
-export const updateCompanies = (id, data) => apiClient.put(`/updateCompanies/${id}`, data);
-export const updatePaymentHistory = (id, data) => apiClient.put(`/updatePaymentHistory/${id}`, data);
-export const updateSupplier = (id, data) => apiClient.put(`/updateSupplier/${id}`, data);
-export const updateSupplyHistory = (id, data) => apiClient.put(`/updateSupplyHistory/${id}`, data);
+export const updateData = (tableName, id, data) => apiClient.put(`/updateData/${tableName}/${id}`, data);
 
 // DELETE requests
-export const deleteDoctor = (id) => apiClient.delete(`/deleteDoctor/${id}`);
-export const deleteCustomer = (id) => apiClient.delete(`/deleteCustomer/${id}`);
-export const deleteMedicalShop = (id) => apiClient.delete(`/deleteMedicalShop/${id}`);
-export const deleteEmployees = (id) => apiClient.delete(`/deleteEmployees/${id}`);
-export const deleteInventory = (id) => apiClient.delete(`/deleteInventory/${id}`);
-export const deleteCompanies = (id) => apiClient.delete(`/deleteCompanies/${id}`);
-export const deletePaymentHistory = (id) => apiClient.delete(`/deletePaymentHistory/${id}`);
-export const deleteSupplier = (id) => apiClient.delete(`/deleteSupplier/${id}`);
-export const deleteSupplyHistory = (id) => apiClient.delete(`/deleteSupplyHistory/${id}`);
+export const deleteData = (entity, id) => apiClient.delete(`/delete/${entity}/${id}`);
+
+// QUERY requests
+export const customQuery = (tableName, queryType, options) => apiClient.post('/query', { tableName, queryType, options });
+
+// Specific table methods (if needed for clarity)
+export const getDoctor = () => getTableData('DOCTOR');
+export const getCustomer = () => getTableData('CUSTOMER');
+export const getMedicalShop = () => getTableData('MEDICAL_SHOP');
+export const getEmployees = () => getTableData('EMPLOYEES');
+export const getInventory = () => getTableData('INVENTORY');
+export const getCompanies = () => getTableData('COMPANIES');
+export const getPaymentHistory = () => getTableData('PAYMENT_HISTORY');
+export const getSupplier = () => getTableData('SUPPLIER');
+export const getSupplyHistory = () => getTableData('SUPPLY_HISTORY');
+
+export const getDoctorById = (id) => getSingleData('DOCTOR', id);
+export const getCustomerById = (id) => getSingleData('CUSTOMER', id);
+export const getMedicalShopById = (id) => getSingleData('MEDICAL_SHOP', id);
+export const getEmployeesById = (id) => getSingleData('EMPLOYEES', id);
+export const getInventoryById = (id) => getSingleData('INVENTORY', id);
+export const getCompaniesById = (id) => getSingleData('COMPANIES', id);
+export const getPaymentHistoryById = (id) => getSingleData('PAYMENT_HISTORY', id);
+export const getSupplierById = (id) => getSingleData('SUPPLIER', id);
+export const getSupplyHistoryById = (id) => getSingleData('SUPPLY_HISTORY', id);
+
+export const createDoctor = (data) => addData('DOCTOR', data);
+export const createCustomer = (data) => addData('CUSTOMER', data);
+export const createMedicalShop = (data) => addData('MEDICAL_SHOP', data);
+export const createEmployees = (data) => addData('EMPLOYEES', data);
+export const createInventory = (data) => addData('INVENTORY', data);
+export const createCompanies = (data) => addData('COMPANIES', data);
+export const createPaymentHistory = (data) => addData('PAYMENT_HISTORY', data);
+export const createSupplier = (data) => addData('SUPPLIER', data);
+export const createSupplyHistory = (data) => addData('SUPPLY_HISTORY', data);
+
+export const updateDoctor = (id, data) => updateData('DOCTOR', id, data);
+export const updateCustomer = (id, data) => updateData('CUSTOMER', id, data);
+export const updateMedicalShop = (id, data) => updateData('MEDICAL_SHOP', id, data);
+export const updateEmployees = (id, data) => updateData('EMPLOYEES', id, data);
+export const updateInventory = (id, data) => updateData('INVENTORY', id, data);
+export const updateCompanies = (id, data) => updateData('COMPANIES', id, data);
+export const updatePaymentHistory = (id, data) => updateData('PAYMENT_HISTORY', id, data);
+export const updateSupplier = (id, data) => updateData('SUPPLIER', id, data);
+export const updateSupplyHistory = (id, data) => updateData('SUPPLY_HISTORY', id, data);
+
+export const deleteDoctor = (id) => deleteData('DOCTOR', id);
+export const deleteCustomer = (id) => deleteData('CUSTOMER', id);
+export const deleteMedicalShop = (id) => deleteData('MEDICAL_SHOP', id);
+export const deleteEmployees = (id) => deleteData('EMPLOYEES', id);
+export const deleteInventory = (id) => deleteData('INVENTORY', id);
+export const deleteCompanies = (id) => deleteData('COMPANIES', id);
+export const deletePaymentHistory = (id) => deleteData('PAYMENT_HISTORY', id);
+export const deleteSupplier = (id) => deleteData('SUPPLIER', id);
+export const deleteSupplyHistory = (id) => deleteData('SUPPLY_HISTORY', id);
+
+// Custom query methods
+// export const selectQuery = (tableName, options) => customQuery(tableName, 'SELECT', options);
+// export const joinQuery = (tableName, options) => customQuery(tableName, 'JOIN', options);
+
+export const selectQuery = async (tableName, options) => {
+  try {
+    const response = await apiClient.post('/query', {
+      tableName,
+      queryType: 'SELECT',
+      options,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error performing SELECT query:', error);
+    throw error;
+  }
+};
+
+export const joinQuery = async (tableName, options) => {
+  try {
+    const response = await apiClient.post('/query', {
+      tableName,
+      queryType: 'JOIN',
+      options,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error performing JOIN query:', error);
+    throw error;
+  }
+};

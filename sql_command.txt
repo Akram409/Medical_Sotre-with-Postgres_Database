@@ -5,3 +5,5 @@ CONSTRAINST ->
     2.CHECK ("AGE" >= x and "AGE" <= y) - check it btw x and y
     3.where x = y - find single data by searching x to find y
     4.RETURNING * - return recent insert data in the table 
+
+    trigger automatic
